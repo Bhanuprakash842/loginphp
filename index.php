@@ -3,7 +3,7 @@
 include './config.php';
 
 if (isset($_SESSION['loggedin'])) {
-  header("Location: success.php");
+  header("Location: main.php");
 }
 
 

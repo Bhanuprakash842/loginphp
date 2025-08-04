@@ -15,6 +15,20 @@ if (isset($_POST['login'])) {
     login($email, $password);
 }
 
+if (isset($_POST['change_password'])) {
+    $newPassword = $_POST['new_password'];
+    $rePassword = $_POST['re_password'];
+    session_start();
+    $email = $_SESSION['email'];
+
+    if ($newPassword !== $rePassword) {
+        alert("Password Not Matched", "change-password.php");
+    } else {
+        changePassword($email, $newPassword);
+    }
+}
+
+
 function alert($msg, $redirect)
 {
     echo "<script type='text/javascript'>alert('$msg');window.location.href='$redirect';</script>";
@@ -29,8 +43,11 @@ function login($email, $password)
         $sql = "SELECT * FROM `users` WHERE `email`='$email' AND `password`='$password'";
         $result = mysqli_query($conn, $sql);
         if (mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
             $_SESSION['loggedin'] = true;
-            alert("Login Succesfull", "index.php");
+            $_SESSION['email'] = $email;
+            $_SESSION['name'] = $row['name'];
+            alert("Login Succesfull", "main.php");
         } else {
             alert("Password Is Incorrect", "index.php");
         }
@@ -50,7 +67,9 @@ function register($name, $email, $password)
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $_SESSION['loggedin'] = true;
-            alert("Registered", "index.php");
+            $_SESSION['email'] = $email;
+            $_SESSION['name'] = $name;
+            alert("Registered", "main.php");
         } else {
             alert("Something went wrong!", "index.php");
         }
@@ -58,3 +77,18 @@ function register($name, $email, $password)
         alert("Email already used!", "index.php");
     }
 }
+
+function changePassword($email, $newPassword)
+{
+    global $conn;
+    $hashedPassword = $newPassword; 
+    $sql = "UPDATE users SET password='$hashedPassword' WHERE email='$email'";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        alert("Password Changed Successfully", "index.php");
+    } else {
+        alert("Error updating password", "change-password.php");
+    }
+}
+
+
